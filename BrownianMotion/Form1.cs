@@ -74,35 +74,29 @@ namespace BrownianMotion {
 			BackgroundWorker worker = sender as BackgroundWorker;
 			int center = 1280, x = 0, y = 0;
 			Bitmap image = updatedImage;
-			Random random;
+			Random random = new Random();
 			try {
-				Graphics g = Graphics.FromImage(image);
 				for (int i = 0; i < numericUpDown1.Value; i++) {
-					random = new Random(Guid.NewGuid().GetHashCode());
-					string[] hexRandom = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
-					string randomHex = "#FF";
-					for (int b = 0; b < 6; b++) {
-						randomHex += hexRandom[random.Next(0, hexRandom.Length)];
-					}
-					int argb = Int32.Parse(randomHex.Replace("#", ""), NumberStyles.HexNumber);
 					x = putInside(x + random.Next(-1, 2));
 					y = putInside(y + random.Next(-1, 2));
 					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
 					crop = ((min < crop) ? min : crop);
 					//draw line and duplicates
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center + x, center + y, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center + x, center - y, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center - x, center + y, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center - x, center - y, 1, 1);
 
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center + y, center + x, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center - y, center + x, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center + y, center - x, 1, 1);
-					g.FillRectangle(new SolidBrush(Color.FromArgb(argb)), center - y, center - x, 1, 1);
+                    Color color = Color.FromArgb( (byte)random.Next(0,256), (byte)random.Next(0,256), (byte)random.Next(0,256) );
+                    image.SetPixel( center + x, center + y, color);
+                    image.SetPixel( center + x, center - y, color);
+                    image.SetPixel( center - x, center + y, color);
+                    image.SetPixel( center - x, center - y, color);
+
+                    image.SetPixel( center + y, center + x, color);
+                    image.SetPixel( center + y, center - x, color);
+                    image.SetPixel( center - y, center + x, color);
+                    image.SetPixel( center - y, center - x, color);
 					if (checkBox1.Checked) {
 						setImage(image);
 					}
-					worker.ReportProgress(((i / (int)numericUpDown1.Value) * 100));
+					worker.ReportProgress((100*i) / (int)numericUpDown1.Value);
 				}
 				if (!checkBox1.Checked) {
 					setImage(image);
@@ -141,6 +135,7 @@ namespace BrownianMotion {
 			numericUpDown1.Enabled = true;
 			progressBar1.Value = 0;
 		}
+
 		//resize image when form size changes
 		private void form1_ResizeEnd(object sender, EventArgs e) {
 			if (!backgroundWorker1.IsBusy) {
