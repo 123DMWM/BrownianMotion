@@ -78,6 +78,7 @@ namespace BrownianMotion {
 			try {
 				Graphics g = Graphics.FromImage(image);
 				for (int i = 0; i < numericUpDown1.Value; i++) {
+					if (worker.CancellationPending) return;
 					x = putInside(x + random.Next(-1, 2));
 					y = putInside(y + random.Next(-1, 2));
 					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
