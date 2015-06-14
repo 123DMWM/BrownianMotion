@@ -57,11 +57,12 @@ namespace BrownianMotion {
 			double scale = Math.Min((double)(widthScale ?? heightScale),
 									 (double)(heightScale ?? widthScale));
 			var bmp2 = new Bitmap((int)Math.Floor(img.Width * scale), (int)Math.Ceiling(img.Height * scale));
-			Graphics g = Graphics.FromImage(bmp2);
-			g.InterpolationMode = InterpolationMode.NearestNeighbor;
-			g.DrawImage(cropAtRect(img, new Rectangle(crop, crop, 2561 - crop * 2, 2561 - crop * 2)), new Rectangle(0, 0, bmp2.Size.Width, bmp2.Size.Height));
-			pictureBox1.Image = bmp2;
-			updatedImage = img;
+			using (Graphics g = Graphics.FromImage(bmp2)) {
+				g.InterpolationMode = InterpolationMode.NearestNeighbor;
+				g.DrawImage(cropAtRect(img, new Rectangle(crop, crop, 2561 - crop * 2, 2561 - crop * 2)), new Rectangle(0, 0, bmp2.Size.Width, bmp2.Size.Height));
+				pictureBox1.Image = bmp2;
+				updatedImage = img;
+			}
 		}
 		//crops the image to where the generated stuff is
 		private Bitmap cropAtRect(Bitmap b, Rectangle r) {
@@ -77,35 +78,37 @@ namespace BrownianMotion {
 			Random random = new Random(Guid.NewGuid().GetHashCode());
 			Color color = Color.FromArgb((byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
 			try {
-				Graphics g = Graphics.FromImage(image);
-				for (int i = 0; i < numericUpDown1.Value; i++) {
-					if (worker.CancellationPending) return;
-					x = putInside(x + random.Next(-1, 2));
-					y = putInside(y + random.Next(-1, 2));
-					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
-					crop = ((min < crop) ? min : crop);
-					//draw line and duplicates
-					image.SetPixel(center + x, center + y, color);
-					image.SetPixel(center + x, center - y, color);
-					image.SetPixel(center - x, center + y, color);
-					image.SetPixel(center - x, center - y, color);
+				using (Graphics g = Graphics.FromImage(image)) {
+					for (int i = 0; i < numericUpDown1.Value; i++) {
+						if (worker.CancellationPending)
+							return;
+						x = putInside(x + random.Next(-1, 2));
+						y = putInside(y + random.Next(-1, 2));
+						int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
+						crop = ((min < crop) ? min : crop);
+						//draw line and duplicates
+						image.SetPixel(center + x, center + y, color);
+						image.SetPixel(center + x, center - y, color);
+						image.SetPixel(center - x, center + y, color);
+						image.SetPixel(center - x, center - y, color);
 
-					image.SetPixel(center + y, center + x, color);
-					image.SetPixel(center - y, center + x, color);
-					image.SetPixel(center + y, center - x, color);
-					image.SetPixel(center - y, center - x, color);
-					color = Color.FromArgb(
-						secureColor(color.R, random.Next(-10, 11)),
-						secureColor(color.G, random.Next(-10, 11)),
-						secureColor(color.B, random.Next(-10, 11))
-					);
-					if (checkBox1.Checked) {
+						image.SetPixel(center + y, center + x, color);
+						image.SetPixel(center - y, center + x, color);
+						image.SetPixel(center + y, center - x, color);
+						image.SetPixel(center - y, center - x, color);
+						color = Color.FromArgb(
+							secureColor(color.R, random.Next(-10, 11)),
+							secureColor(color.G, random.Next(-10, 11)),
+							secureColor(color.B, random.Next(-10, 11))
+						);
+						if (checkBox1.Checked) {
+							setImage(image);
+						}
+						worker.ReportProgress((100 * i) / (int)numericUpDown1.Value);
+					}
+					if (!checkBox1.Checked) {
 						setImage(image);
 					}
-					worker.ReportProgress((100 *i) / (int)numericUpDown1.Value);
-				}
-				if (!checkBox1.Checked) {
-					setImage(image);
 				}
 			} catch (Exception ex) {
 				MessageBox.Show(ex.ToString(),
