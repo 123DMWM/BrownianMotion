@@ -75,6 +75,7 @@ namespace BrownianMotion {
 			int center = 1280, x = 0, y = 0;
 			Bitmap image = updatedImage;
 			Random random = new Random(Guid.NewGuid().GetHashCode());
+			Color color = Color.FromArgb((byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
 			try {
 				Graphics g = Graphics.FromImage(image);
 				for (int i = 0; i < numericUpDown1.Value; i++) {
@@ -84,7 +85,6 @@ namespace BrownianMotion {
 					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
 					crop = ((min < crop) ? min : crop);
 					//draw line and duplicates
-					Color color = Color.FromArgb((byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
 					image.SetPixel(center + x, center + y, color);
 					image.SetPixel(center + x, center - y, color);
 					image.SetPixel(center - x, center + y, color);
@@ -94,6 +94,11 @@ namespace BrownianMotion {
 					image.SetPixel(center - y, center + x, color);
 					image.SetPixel(center + y, center - x, color);
 					image.SetPixel(center - y, center - x, color);
+					color = Color.FromArgb(
+						secureColor(color.R, random.Next(-10, 11)),
+						secureColor(color.G, random.Next(-10, 11)),
+						secureColor(color.B, random.Next(-10, 11))
+					);
 					if (checkBox1.Checked) {
 						setImage(image);
 					}
@@ -117,6 +122,15 @@ namespace BrownianMotion {
 				return 0;
 			}
 			return coord;
+		}
+		//makes sure color is valid byte
+		private byte secureColor(byte col, int add) {
+			if ((col + add) > 255) {
+				return 255;
+			} else if ((col + add) < 0) {
+				return 0;
+			}
+			return (byte)(col + add);
 		}
 
 		private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e) {
