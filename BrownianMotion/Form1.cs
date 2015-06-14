@@ -25,9 +25,9 @@ namespace BrownianMotion {
 		private void button1_Click(object sender, EventArgs e) {
 			if (!backgroundWorker1.IsBusy) {
 				button1.Text = "Cancel";
-				button2.Enabled = false;
+				checkBox2.Enabled = false;
 				numericUpDown1.Enabled = false;
-				if (pictureBox1.Image == null) {
+				if (pictureBox1.Image == null || !checkBox2.Checked) {
 					resetPictureBox();
 				}
 				backgroundWorker1.RunWorkerAsync();
@@ -146,7 +146,7 @@ namespace BrownianMotion {
 				label2.Text = "Done!";
 			}
 			button1.Text = "Generate";
-			button2.Enabled = true;
+			checkBox2.Enabled = true;
 			numericUpDown1.Enabled = true;
 			progressBar1.Value = 0;
 		}
