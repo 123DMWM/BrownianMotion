@@ -59,6 +59,7 @@ namespace BrownianMotion {
 			var bmp2 = new Bitmap((int)Math.Floor(img.Width * scale), (int)Math.Ceiling(img.Height * scale));
 			using (Graphics g = Graphics.FromImage(bmp2)) {
 				g.InterpolationMode = InterpolationMode.NearestNeighbor;
+				g.PixelOffsetMode = PixelOffsetMode.Half;
 				g.DrawImage(cropAtRect(img, new Rectangle(crop, crop, 2561 - crop * 2, 2561 - crop * 2)), new Rectangle(0, 0, bmp2.Size.Width, bmp2.Size.Height));
 				pictureBox1.Image = bmp2;
 				updatedImage = img;
