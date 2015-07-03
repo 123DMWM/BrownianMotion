@@ -18,6 +18,7 @@ namespace BrownianMotion {
 		public ControlForm() {
 			InitializeComponent();
 			pForm.Show();
+			updateColor();
 		}
 
 		//Start line generator
@@ -25,7 +26,13 @@ namespace BrownianMotion {
 			if (!backgroundWorker1.IsBusy) {
 				button1.Text = "Cancel";
 				checkBox2.Enabled = false;
+				checkBox3.Enabled = false;
 				numericUpDown1.Enabled = false;
+				if (checkBox3.Checked) {
+					numericUpDownR.Enabled = false;
+					numericUpDownG.Enabled = false;
+					numericUpDownB.Enabled = false;
+				}
 				if (pForm.pictureBox1.Image == null || !checkBox2.Checked) {
 					resetPictureBox();
 				}
@@ -79,40 +86,43 @@ namespace BrownianMotion {
 			int center = 1280, x = 0, y = 0;
 			Bitmap image = updatedImage;
 			Random random = new Random(Guid.NewGuid().GetHashCode());
-			Color color = Color.FromArgb((byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
+			Color color;
+			if (checkBox3.Checked) {
+				color = Color.FromArgb(byte.Parse(numericUpDownR.Value.ToString()), byte.Parse(numericUpDownG.Value.ToString()), byte.Parse(numericUpDownB.Value.ToString()));
+			} else {
+				color = Color.FromArgb((byte)random.Next(0, 256), (byte)random.Next(0, 256), (byte)random.Next(0, 256));
+			}
 			try {
-				using (Graphics g = Graphics.FromImage(image)) {
-					for (int i = 0; i < numericUpDown1.Value; i++) {
-						if (worker.CancellationPending)
-							return;
-						x = putInside(x + random.Next(-1, 2));
-						y = putInside(y + random.Next(-1, 2));
-						int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
-						crop = ((min < crop) ? min : crop);
-						//draw line and duplicates
-						image.SetPixel(center + x, center + y, color);
-						image.SetPixel(center + x, center - y, color);
-						image.SetPixel(center - x, center + y, color);
-						image.SetPixel(center - x, center - y, color);
+				for (int i = 0; i < numericUpDown1.Value; i++) {
+					if (worker.CancellationPending)
+						return;
+					x = putInside(x + random.Next(-1, 2));
+					y = putInside(y + random.Next(-1, 2));
+					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
+					crop = ((min < crop) ? min : crop);
+					//draw line and duplicates
+					image.SetPixel(center + x, center + y, color);
+					image.SetPixel(center + x, center - y, color);
+					image.SetPixel(center - x, center + y, color);
+					image.SetPixel(center - x, center - y, color);
 
-						image.SetPixel(center + y, center + x, color);
-						image.SetPixel(center - y, center + x, color);
-						image.SetPixel(center + y, center - x, color);
-						image.SetPixel(center - y, center - x, color);
-						color = Color.FromArgb(
-							secureColor(color.R, random.Next(-10, 11)),
-							secureColor(color.G, random.Next(-10, 11)),
-							secureColor(color.B, random.Next(-10, 11))
-						);
-						worker.ReportProgress((100 * i) / (int)numericUpDown1.Value);
-						if (checkBox1.Checked){// && (((i % 10) == 1) || i == (numericUpDown1.Value - 1))) {
-							//Thread.Sleep(2);
-							setImage(image);
-						}
-					}
-					if (!checkBox1.Checked) {
+					image.SetPixel(center + y, center + x, color);
+					image.SetPixel(center - y, center + x, color);
+					image.SetPixel(center + y, center - x, color);
+					image.SetPixel(center - y, center - x, color);
+					color = Color.FromArgb(
+						secureColor(color.R, random.Next(-10, 11)),
+						secureColor(color.G, random.Next(-10, 11)),
+						secureColor(color.B, random.Next(-10, 11))
+					);
+					worker.ReportProgress((100 * i) / (int)numericUpDown1.Value);
+					if (checkBox1.Checked) {// && (((i % 10) == 1) || i == (numericUpDown1.Value - 1))) {
+						//Thread.Sleep(2);
 						setImage(image);
 					}
+				}
+				if (!checkBox1.Checked) {
+					setImage(image);
 				}
 			} catch (Exception ex) {
 				MessageBox.Show(ex.ToString(),
@@ -154,8 +164,48 @@ namespace BrownianMotion {
 			}
 			button1.Text = "Generate";
 			checkBox2.Enabled = true;
+			checkBox3.Enabled = true;
 			numericUpDown1.Enabled = true;
+			if (checkBox3.Checked) {
+				numericUpDownR.Enabled = true;
+				numericUpDownG.Enabled = true;
+				numericUpDownB.Enabled = true;
+			}
 			progressBar1.Value = 0;
+		}
+
+		private void numericUpDownR_ValueChanged(object sender, EventArgs e) {
+			updateColor();
+		}
+
+		private void numericUpDownG_ValueChanged(object sender, EventArgs e) {
+			updateColor();
+		}
+
+		private void numericUpDownB_ValueChanged(object sender, EventArgs e) {
+			updateColor();
+		}
+		public void updateColor() {
+			Bitmap Bmp = new Bitmap(78, 78);
+			using (Graphics g = Graphics.FromImage(Bmp)) {
+				g.FillRectangle(new SolidBrush(Color.FromArgb(
+					byte.Parse(numericUpDownR.Value.ToString()),
+					byte.Parse(numericUpDownG.Value.ToString()),
+					byte.Parse(numericUpDownB.Value.ToString()))), 0, 0, 78, 78);
+				pictureBox1.Image = Bmp;
+			}
+		}
+
+		private void checkBox3_CheckedChanged(object sender, EventArgs e) {
+			if (checkBox3.Checked) {
+				numericUpDownR.Enabled = true;
+				numericUpDownG.Enabled = true;
+				numericUpDownB.Enabled = true;
+			} else {
+				numericUpDownR.Enabled = false;
+				numericUpDownG.Enabled = false;
+				numericUpDownB.Enabled = false;
+			}
 		}
 	}
 }
