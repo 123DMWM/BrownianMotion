@@ -14,23 +14,25 @@ namespace BrownianMotion {
 	public partial class ControlForm : Form {
 		public static PictureForm pForm = new PictureForm();
 		public Bitmap updatedImage = new Bitmap(1, 1);
-		public static int maxY = ((getMaxSize() % 2 == 1) ? getMaxSize() : (getMaxSize() + 1));
-		public static int crop = ((maxY - 1) / 2);
+		public static int maxSize = ((getMaxSize() % 2 == 1) ? getMaxSize() : (getMaxSize() + 1));
+		public static int crop = ((maxSize - 1) / 2);
 
 		public ControlForm() {
 			InitializeComponent();
 			pForm.Show();
 			updateColor();
 			pForm.pictureBox1.SizeChanged += new System.EventHandler(pictureBox1_Update);
+			saveFile.Filter = "Image Files|*.bmp;*.jpg;*.jpeg;*.png;*.tif;*.tiff|All Files|*.*";
 		}
 
 		//Start line generator
 		public void button1_Click(object sender, EventArgs e) {
 			if (!backgroundWorker1.IsBusy) {
 				button1.Text = "Cancel";
+				//First run or Add layer?
 				if (pForm.pictureBox1.Image == null || !checkBox2.Checked) {
 					resetPictureBox();
-				}
+				}//
 				backgroundWorker1.RunWorkerAsync();
 				changeBools(true);
 			} else if (backgroundWorker1.WorkerSupportsCancellation) {
@@ -50,12 +52,9 @@ namespace BrownianMotion {
 
 		//Fill in pictureBox1 with white rectangle
 		public void resetPictureBox() {
-			Bitmap Bmp = new Bitmap(maxY, maxY);
-			using (Graphics g = Graphics.FromImage(Bmp)) {
-				g.FillRectangle(new SolidBrush(Color.White), 0, 0, maxY, maxY);
-				crop = ((maxY - 1) / 2);
-				setImage(Bmp);
-			}
+			Bitmap Bmp = new Bitmap(maxSize, maxSize);
+			crop = ((maxSize - 1) / 2);
+			setImage(Bmp);
 		}//
 
 		//Resize picturebox to fit new window
@@ -67,7 +66,7 @@ namespace BrownianMotion {
 
 		//Render image in pictureBox1
 		public void setImage(Bitmap img) {
-			int size = pForm.pictureBox1.Height;
+			int size = Math.Min(pForm.pictureBox1.Height, pForm.pictureBox1.Width);
 			Bitmap newImage = new Bitmap(size, size);//Memory bug/error resides here
 			using (Graphics g = Graphics.FromImage(newImage)) {
 				g.InterpolationMode = InterpolationMode.NearestNeighbor;
@@ -83,7 +82,7 @@ namespace BrownianMotion {
 
 		//Crop the image to generated area
 		public Bitmap cropAtRect(Bitmap b) {
-			Rectangle r = new Rectangle(crop, crop, maxY - crop * 2, maxY - crop * 2);
+			Rectangle r = new Rectangle(crop, crop, maxSize - crop * 2, maxSize - crop * 2);
 			Bitmap nb = new Bitmap(r.Width, r.Height);
 			using (Graphics g = Graphics.FromImage(nb)) {
 				g.DrawImage(b, -r.X, -r.Y);
@@ -94,7 +93,7 @@ namespace BrownianMotion {
 		//Main code to generate the image
 		public void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e) {
 			BackgroundWorker worker = sender as BackgroundWorker;
-			int center = ((maxY - 1) / 2), x = 0, y = 0;
+			int center = ((maxSize - 1) / 2), x = 0, y = 0;
 			Bitmap image = updatedImage;
 			Random random = new Random(Guid.NewGuid().GetHashCode());
 			Color color;
@@ -149,9 +148,9 @@ namespace BrownianMotion {
 
 		//Make sure coords are inside the image
 		public int putInside(int coord) {
-			if (((maxY - 1) / 2) + coord >= maxY || ((maxY - 1) / 2) - coord >= maxY) {
-				return maxY;
-			} else if (((maxY - 1) / 2) + coord < 0 || ((maxY - 1) / 2) - coord < 0) {
+			if (((maxSize - 1) / 2) + coord >= maxSize || ((maxSize - 1) / 2) - coord >= maxSize) {
+				return maxSize;
+			} else if (((maxSize - 1) / 2) + coord < 0 || ((maxSize - 1) / 2) - coord < 0) {
 				return 0;
 			}
 			return coord;
@@ -208,6 +207,7 @@ namespace BrownianMotion {
 
 		//Update control states
 		public void changeBools(bool starting) {
+			button2.Enabled = !starting;
 			checkBox2.Enabled = !starting;
 			checkBox3.Enabled = !starting;
 			numericUpDown1.Enabled = !starting;
@@ -228,5 +228,20 @@ namespace BrownianMotion {
 		public static int getMaxSize() {
 			return Math.Min(Screen.PrimaryScreen.Bounds.Height, Screen.PrimaryScreen.Bounds.Width);
 		}//
+
+		//Save image
+		public readonly SaveFileDialog saveFile = new SaveFileDialog();
+		public void button2_Click_1(object sender, EventArgs e) {
+			if (saveFile.ShowDialog() == DialogResult.OK) {
+				try {
+					cropAtRect(updatedImage).Save(saveFile.FileName);
+				} catch (Exception ex) {
+					MessageBox.Show(ex.ToString(),
+									"Error saving image",
+									MessageBoxButtons.OK,
+									MessageBoxIcon.Error);
+				}
+			}
+		}
 	}
 }
