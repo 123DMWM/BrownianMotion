@@ -40,17 +40,21 @@
 			this.numericUpDownB = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
+			this.label6 = new System.Windows.Forms.Label();
+			this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+			this.label7 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownR)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownG)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownB)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// button1
 			// 
 			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.button1.Location = new System.Drawing.Point(88, 215);
+			this.button1.Location = new System.Drawing.Point(88, 235);
 			this.button1.Name = "button1";
 			this.button1.Size = new System.Drawing.Size(100, 28);
 			this.button1.TabIndex = 0;
@@ -60,9 +64,9 @@
 			// 
 			// progressBar1
 			// 
-			this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.progressBar1.Location = new System.Drawing.Point(12, 249);
+			this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+			| System.Windows.Forms.AnchorStyles.Right)));
+			this.progressBar1.Location = new System.Drawing.Point(12, 269);
 			this.progressBar1.Name = "progressBar1";
 			this.progressBar1.Size = new System.Drawing.Size(176, 23);
 			this.progressBar1.TabIndex = 1;
@@ -79,7 +83,7 @@
 			// 
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(12, 221);
+			this.label1.Location = new System.Drawing.Point(12, 241);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(0, 17);
 			this.label1.TabIndex = 2;
@@ -88,7 +92,7 @@
 			// 
 			this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkBox1.AutoSize = true;
-			this.checkBox1.Location = new System.Drawing.Point(88, 188);
+			this.checkBox1.Location = new System.Drawing.Point(88, 208);
 			this.checkBox1.Name = "checkBox1";
 			this.checkBox1.Size = new System.Drawing.Size(78, 21);
 			this.checkBox1.TabIndex = 3;
@@ -99,7 +103,7 @@
 			// 
 			this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.checkBox2.AutoSize = true;
-			this.checkBox2.Location = new System.Drawing.Point(88, 161);
+			this.checkBox2.Location = new System.Drawing.Point(88, 181);
 			this.checkBox2.Name = "checkBox2";
 			this.checkBox2.Size = new System.Drawing.Size(87, 21);
 			this.checkBox2.TabIndex = 4;
@@ -240,12 +244,50 @@
 			this.pictureBox1.TabIndex = 14;
 			this.pictureBox1.TabStop = false;
 			// 
+			// label6
+			// 
+			this.label6.AutoSize = true;
+			this.label6.Location = new System.Drawing.Point(12, 160);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(148, 17);
+			this.label6.TabIndex = 15;
+			this.label6.Text = "Color change intensity";
+			// 
+			// numericUpDown2
+			// 
+			this.numericUpDown2.Location = new System.Drawing.Point(40, 180);
+			this.numericUpDown2.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+			this.numericUpDown2.Name = "numericUpDown2";
+			this.numericUpDown2.Size = new System.Drawing.Size(42, 22);
+			this.numericUpDown2.TabIndex = 16;
+			this.numericUpDown2.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(13, 182);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(21, 17);
+			this.label7.TabIndex = 17;
+			this.label7.Text = "+-";
+			// 
 			// ControlForm
 			// 
 			this.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(200, 284);
+			this.ClientSize = new System.Drawing.Size(200, 304);
+			this.Controls.Add(this.label7);
+			this.Controls.Add(this.numericUpDown2);
+			this.Controls.Add(this.label6);
 			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.numericUpDownB);
 			this.Controls.Add(this.label5);
@@ -265,7 +307,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
-			this.MinimumSize = new System.Drawing.Size(222, 333);
+			this.MinimumSize = new System.Drawing.Size(222, 353);
 			this.Name = "ControlForm";
 			this.Text = "Controls";
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
@@ -273,6 +315,7 @@
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownG)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDownB)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -296,5 +339,8 @@
 		public System.Windows.Forms.NumericUpDown numericUpDownB;
 		public System.Windows.Forms.Label label5;
 		public System.Windows.Forms.PictureBox pictureBox1;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.NumericUpDown numericUpDown2;
+		private System.Windows.Forms.Label label7;
 	}
 }

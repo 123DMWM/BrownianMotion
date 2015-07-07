@@ -25,18 +25,11 @@ namespace BrownianMotion {
 		public void button1_Click(object sender, EventArgs e) {
 			if (!backgroundWorker1.IsBusy) {
 				button1.Text = "Cancel";
-				checkBox2.Enabled = false;
-				checkBox3.Enabled = false;
-				numericUpDown1.Enabled = false;
-				if (checkBox3.Checked) {
-					numericUpDownR.Enabled = false;
-					numericUpDownG.Enabled = false;
-					numericUpDownB.Enabled = false;
-				}
 				if (pForm.pictureBox1.Image == null || !checkBox2.Checked) {
 					resetPictureBox();
 				}
 				backgroundWorker1.RunWorkerAsync();
+				changeBools(true);
 			} else if (backgroundWorker1.WorkerSupportsCancellation) {
 				backgroundWorker1.CancelAsync();
 			}
@@ -110,10 +103,11 @@ namespace BrownianMotion {
 					image.SetPixel(center - y, center + x, color);
 					image.SetPixel(center + y, center - x, color);
 					image.SetPixel(center - y, center - x, color);
+					int change = (int)numericUpDown2.Value;
 					color = Color.FromArgb(
-						secureColor(color.R, random.Next(-10, 11)),
-						secureColor(color.G, random.Next(-10, 11)),
-						secureColor(color.B, random.Next(-10, 11))
+						secureColor(color.R, random.Next(-change, change + 1)),
+						secureColor(color.G, random.Next(-change, change + 1)),
+						secureColor(color.B, random.Next(-change, change + 1))
 					);
 					worker.ReportProgress((100 * i) / (int)numericUpDown1.Value);
 					if (checkBox1.Checked) {// && (((i % 10) == 1) || i == (numericUpDown1.Value - 1))) {
@@ -163,15 +157,8 @@ namespace BrownianMotion {
 				label1.Text = "Done!";
 			}
 			button1.Text = "Generate";
-			checkBox2.Enabled = true;
-			checkBox3.Enabled = true;
-			numericUpDown1.Enabled = true;
-			if (checkBox3.Checked) {
-				numericUpDownR.Enabled = true;
-				numericUpDownG.Enabled = true;
-				numericUpDownB.Enabled = true;
-			}
 			progressBar1.Value = 0;
+			changeBools(false);
 		}
 
 		private void numericUpDownR_ValueChanged(object sender, EventArgs e) {
@@ -193,6 +180,17 @@ namespace BrownianMotion {
 					byte.Parse(numericUpDownG.Value.ToString()),
 					byte.Parse(numericUpDownB.Value.ToString()))), 0, 0, 78, 78);
 				pictureBox1.Image = Bmp;
+			}
+		}
+		public void changeBools(bool starting) {
+			checkBox2.Enabled = !starting;
+			checkBox3.Enabled = !starting;
+			numericUpDown1.Enabled = !starting;
+			numericUpDown2.Enabled = !starting;
+			if (checkBox3.Checked) {
+				numericUpDownR.Enabled = !starting;
+				numericUpDownG.Enabled = !starting;
+				numericUpDownB.Enabled = !starting;
 			}
 		}
 

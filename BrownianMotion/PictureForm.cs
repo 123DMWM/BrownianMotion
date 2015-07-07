@@ -19,8 +19,7 @@ namespace BrownianMotion {
 		public PictureForm() {
 			InitializeComponent();
 		}
-		public PictureForm(Form callingForm)
-		{
+		public PictureForm(Form callingForm) {
 			InitializeComponent();
 			cForm = callingForm as ControlForm;
 		}
