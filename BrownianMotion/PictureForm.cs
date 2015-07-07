@@ -19,16 +19,5 @@ namespace BrownianMotion {
 		public PictureForm() {
 			InitializeComponent();
 		}
-		public PictureForm(Form callingForm) {
-			InitializeComponent();
-			cForm = callingForm as ControlForm;
-		}
-
-		//resize image when form size changes
-		public void pictureBox1_Update(object sender, EventArgs e) {
-			if (!cForm.backgroundWorker1.IsBusy) {
-				cForm.setImage(cForm.updatedImage);
-			}
-		}
 	}
 }

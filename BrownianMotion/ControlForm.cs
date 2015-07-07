@@ -12,13 +12,16 @@ using System.Windows.Forms;
 
 namespace BrownianMotion {
 	public partial class ControlForm : Form {
-		public PictureForm pForm = new PictureForm();
+		public static PictureForm pForm = new PictureForm();
 		public Bitmap updatedImage = new Bitmap(1, 1);
-		public int crop = 1280;
+		public static int maxY = ((getMaxSize() % 2 == 1) ? getMaxSize() : (getMaxSize() + 1));
+		public static int crop = ((maxY - 1) / 2);
+
 		public ControlForm() {
 			InitializeComponent();
 			pForm.Show();
 			updateColor();
+			pForm.pictureBox1.SizeChanged += new System.EventHandler(pictureBox1_Update);
 		}
 
 		//Start line generator
@@ -33,53 +36,69 @@ namespace BrownianMotion {
 			} else if (backgroundWorker1.WorkerSupportsCancellation) {
 				backgroundWorker1.CancelAsync();
 			}
+		}//
 
-		}
+		//resize image when form size changes
+		public void pictureBox1_Update(object sender, EventArgs e) {
+			resizePictureBox();
+		}//
 
-		//reset pictureBox1 to white rectangle
+		//Reset pictureBox1 to white rectangle
 		public void button2_Click(object sender, EventArgs e) {
 			resetPictureBox();
-		}
+		}//
 
-		//Fills in pictureBox1 with white rectangle
+		//Fill in pictureBox1 with white rectangle
 		public void resetPictureBox() {
-			Bitmap Bmp = new Bitmap(2561, 2561);
+			Bitmap Bmp = new Bitmap(maxY, maxY);
 			using (Graphics g = Graphics.FromImage(Bmp)) {
-				g.FillRectangle(new SolidBrush(Color.White), 0, 0, 2561, 2561);
-				crop = 1280;
+				g.FillRectangle(new SolidBrush(Color.White), 0, 0, maxY, maxY);
+				crop = ((maxY - 1) / 2);
 				setImage(Bmp);
 			}
-		}
-		//render image in pictureBox1
+		}//
+
+		//Resize picturebox to fit new window
+		public void resizePictureBox() {
+			if (!backgroundWorker1.IsBusy) {
+				setImage(updatedImage);
+			}
+		}//
+
+		//Render image in pictureBox1
 		public void setImage(Bitmap img) {
-			double? widthScale = pForm.pictureBox1.Width / (double)img.Width;
-			double? heightScale = pForm.pictureBox1.Height / (double)img.Height;
-			double scale = Math.Min((double)(widthScale ?? heightScale),
-									 (double)(heightScale ?? widthScale));
-			var bmp2 = new Bitmap((int)Math.Floor(img.Width * scale), (int)Math.Ceiling(img.Height * scale));
-			using (Graphics g = Graphics.FromImage(bmp2)) {
+			int size = pForm.pictureBox1.Height;
+			Bitmap newImage = new Bitmap(size, size);//Memory bug/error resides here
+			using (Graphics g = Graphics.FromImage(newImage)) {
 				g.InterpolationMode = InterpolationMode.NearestNeighbor;
 				g.PixelOffsetMode = PixelOffsetMode.Half;
-				Bitmap cropped = cropAtRect(img, new Rectangle(crop, crop, 2561 - crop * 2, 2561 - crop * 2));
-				g.DrawImage(cropped, new Rectangle(0, 0, bmp2.Size.Width, bmp2.Size.Height));
-				pForm.pictureBox1.Image = bmp2;
-				updatedImage = img;
+				g.DrawImage(cropAtRect(img), new Rectangle(0, 0, size, size));
 			}
-		}
-		//crops the image to where the generated stuff is
-		public Bitmap cropAtRect(Bitmap b, Rectangle r) {
+			if (pForm.pictureBox1.Image != null) {
+				pForm.pictureBox1.Image.Dispose();
+			}
+			pForm.pictureBox1.Image = newImage;
+			updatedImage = img;
+		}//
+
+		//Crop the image to generated area
+		public Bitmap cropAtRect(Bitmap b) {
+			Rectangle r = new Rectangle(crop, crop, maxY - crop * 2, maxY - crop * 2);
 			Bitmap nb = new Bitmap(r.Width, r.Height);
 			using (Graphics g = Graphics.FromImage(nb)) {
 				g.DrawImage(b, -r.X, -r.Y);
 			}
 			return nb;
-		}
+		}//
+
+		//Main code to generate the image
 		public void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e) {
 			BackgroundWorker worker = sender as BackgroundWorker;
-			int center = 1280, x = 0, y = 0;
+			int center = ((maxY - 1) / 2), x = 0, y = 0;
 			Bitmap image = updatedImage;
 			Random random = new Random(Guid.NewGuid().GetHashCode());
 			Color color;
+			//Custom color?
 			if (checkBox3.Checked) {
 				color = Color.FromArgb(byte.Parse(numericUpDownR.Value.ToString()), byte.Parse(numericUpDownG.Value.ToString()), byte.Parse(numericUpDownB.Value.ToString()));
 			} else {
@@ -93,7 +112,7 @@ namespace BrownianMotion {
 					y = putInside(y + random.Next(-1, 2));
 					int min = Math.Min(Math.Min(center - x, center + x), Math.Min(center + y, center - y));
 					crop = ((min < crop) ? min : crop);
-					//draw line and duplicates
+					//Draw line and duplicates
 					image.SetPixel(center + x, center + y, color);
 					image.SetPixel(center + x, center - y, color);
 					image.SetPixel(center - x, center + y, color);
@@ -103,6 +122,8 @@ namespace BrownianMotion {
 					image.SetPixel(center - y, center + x, color);
 					image.SetPixel(center + y, center - x, color);
 					image.SetPixel(center - y, center - x, color);
+
+					//Change color for next iteration
 					int change = (int)numericUpDown2.Value;
 					color = Color.FromArgb(
 						secureColor(color.R, random.Next(-change, change + 1)),
@@ -110,8 +131,8 @@ namespace BrownianMotion {
 						secureColor(color.B, random.Next(-change, change + 1))
 					);
 					worker.ReportProgress((100 * i) / (int)numericUpDown1.Value);
-					if (checkBox1.Checked) {// && (((i % 10) == 1) || i == (numericUpDown1.Value - 1))) {
-						//Thread.Sleep(2);
+					//Watch?
+					if (checkBox1.Checked) {
 						setImage(image);
 					}
 				}
@@ -124,17 +145,19 @@ namespace BrownianMotion {
 				MessageBoxButtons.OK,
 				MessageBoxIcon.Error);
 			}
-		}
-		//makes sure coords are inside the image
+		}//
+
+		//Make sure coords are inside the image
 		public int putInside(int coord) {
-			if (1280 + coord >= 2561 || 1280 - coord >= 2561) {
-				return 2561;
-			} else if (1280 + coord < 0 || 1280 - coord < 0) {
+			if (((maxY - 1) / 2) + coord >= maxY || ((maxY - 1) / 2) - coord >= maxY) {
+				return maxY;
+			} else if (((maxY - 1) / 2) + coord < 0 || ((maxY - 1) / 2) - coord < 0) {
 				return 0;
 			}
 			return coord;
-		}
-		//makes sure color is valid byte
+		}//
+
+		//Make sure color is valid byte
 		public byte secureColor(byte col, int add) {
 			if ((col + add) > 255) {
 				return 255;
@@ -142,8 +165,9 @@ namespace BrownianMotion {
 				return 0;
 			}
 			return (byte)(col + add);
-		}
+		}//
 
+		//Update progress label and bar
 		public void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e) {
 			progressBar1.Value = e.ProgressPercentage;
 			label1.Text = e.ProgressPercentage + "%";
@@ -159,17 +183,16 @@ namespace BrownianMotion {
 			button1.Text = "Generate";
 			progressBar1.Value = 0;
 			changeBools(false);
-		}
+		}//
 
-		private void numericUpDownR_ValueChanged(object sender, EventArgs e) {
+		//Update color preview
+		public void numericUpDownR_ValueChanged(object sender, EventArgs e) {
 			updateColor();
 		}
-
-		private void numericUpDownG_ValueChanged(object sender, EventArgs e) {
+		public void numericUpDownG_ValueChanged(object sender, EventArgs e) {
 			updateColor();
 		}
-
-		private void numericUpDownB_ValueChanged(object sender, EventArgs e) {
+		public void numericUpDownB_ValueChanged(object sender, EventArgs e) {
 			updateColor();
 		}
 		public void updateColor() {
@@ -181,7 +204,9 @@ namespace BrownianMotion {
 					byte.Parse(numericUpDownB.Value.ToString()))), 0, 0, 78, 78);
 				pictureBox1.Image = Bmp;
 			}
-		}
+		}//
+
+		//Update control states
 		public void changeBools(bool starting) {
 			checkBox2.Enabled = !starting;
 			checkBox3.Enabled = !starting;
@@ -193,17 +218,15 @@ namespace BrownianMotion {
 				numericUpDownB.Enabled = !starting;
 			}
 		}
+		public void checkBox3_CheckedChanged(object sender, EventArgs e) {
+			numericUpDownR.Enabled = checkBox3.Checked;
+			numericUpDownG.Enabled = checkBox3.Checked;
+			numericUpDownB.Enabled = checkBox3.Checked;
+		}//		
 
-		private void checkBox3_CheckedChanged(object sender, EventArgs e) {
-			if (checkBox3.Checked) {
-				numericUpDownR.Enabled = true;
-				numericUpDownG.Enabled = true;
-				numericUpDownB.Enabled = true;
-			} else {
-				numericUpDownR.Enabled = false;
-				numericUpDownG.Enabled = false;
-				numericUpDownB.Enabled = false;
-			}
-		}
+		//Get the smallest of the two resolutions
+		public static int getMaxSize() {
+			return Math.Min(Screen.PrimaryScreen.Bounds.Height, Screen.PrimaryScreen.Bounds.Width);
+		}//
 	}
 }
